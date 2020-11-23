@@ -24,122 +24,117 @@ Dictionary::Dictionary() {
 			{
 				vector<string> trigrams= getTrigrams(line);
 				Word word {line, trigrams};
-				vector<Word> vector_word = words[word_size - 1];
-				vector_word.push_back(word);
-				sort(vector_word.begin(), vector_word.end());
+				words[word_size-1].push_back(word) ;
+				
+				//sort(vector_word.begin(), vector_word.end());
 			}
 			us.insert(line);
+			
 		}
 		
 	} else {
 		cout << "File not found!\n";
 	}
-	
-		cout<< us.size()<<std::endl;
-
-	
 }
 
 bool Dictionary::contains(const string& word) const {
-	for (const auto& element: us)
-	{
-		if (element== word)
-		{
-			return true;
-		}
-		
-	}
-	
-	return false;
+	return us.count(word)>0;
 }
 
 vector<string> Dictionary::get_suggestions(const string& word) const {
 	vector<string> suggestions;
 	add_trigram_suggestions(suggestions, word);
+	cout<<suggestions.size()<<std::endl;
+
 	rank_suggestions(suggestions, word);
+		cout<<suggestions.size()<<std::endl;
+
 	trim_suggestions(suggestions);
+		cout<<suggestions.size()<<std::endl;
+
 	return suggestions;
 }
 
-vector<string> Dictionary::getTrigrams(const string& word)
+vector<string> Dictionary::getTrigrams(const string& word) const
 {
 	vector<string> trigrams;
+	if (word.size()>3)
+	{
 	for (size_t i = 0; i < word.size()-2; i++)
 	{
 		trigrams.push_back(word.substr(i, i+3));
 	}
 	sort(trigrams.begin(), trigrams.end()); 
+	}
 
 	return trigrams;
 }
 
 void Dictionary::add_trigram_suggestions(  vector<string>& suggestions ,const string& word) const
 {
-	for(int i = word.size() - 2; i <= word.size(); i++) {
+	for(size_t i = word.size() - 2; i <= word.size(); i++) {
 		vector<Word> word_vector= words[i];
-		for(int k = 0; k < word_vector.size(); k++)
+		for(size_t k = 0; k < word_vector.size(); k++)
 		{
+			if (word_vector.at(k).get_matches(getTrigrams(word))>=word.size()-2)
+			{
 			suggestions.push_back(word_vector.at(k).get_word());
+			}
+			
 		}
+			cout<<"word_vector size: "<<word_vector.size()<<std::endl;
 	}
 }
 void Dictionary::rank_suggestions( vector<string>& suggestions ,const string& word) const
 {
-vector<std::pair<unsigned int, string>> pairs;
+vector<std::pair<int, string>> pairs;
 	
 	for (string& suggestion : suggestions)
 	{
-		int dist = count_dist(suggestion, word);
+		int dist = count_dist(word, suggestion);
 		pairs.push_back(std::make_pair(dist, suggestion));
 	}
 
 	std::sort(pairs.begin(), pairs.end());
 	vector<string> newSuggestions;
-	for (std::pair<unsigned int, string> pair : pairs)
+	for (std::pair<int, string> pair : pairs)
 		newSuggestions.push_back(pair.second);
      	suggestions = newSuggestions;
 }
 void Dictionary::trim_suggestions(  vector<string>& suggestions) const
 {
-	vector<string> suggestions_to_return;
-	for (size_t i = 0; i < 5; i++)
-	{
-		suggestions_to_return.push_back(suggestions[i]);
-	}
-	suggestions= suggestions_to_return;
+	suggestions.resize(5);
 }
 
-int Dictionary::count_dist(string& suggestion, const string& word) const {
-	int count{0};
+// första är vår ord, andra är destinationen eller hur?!
+int Dictionary::count_dist(const string& word,const string& suggestion) const {
 
-	if (suggestion.size() != word.size())
+	int matrix[26][26]; 
+	for (size_t i = 0; i <= word.size(); ++i)
+		matrix[i][0] = i;
+	for (size_t i = 0; i <= suggestion.size(); ++i)
+		matrix[0][i] = i;
+
+	for (size_t i = 1; i <= word.size(); ++i)
 	{
-		count++;
-	}
-	if (suggestion.size()> word.size())
-	{
-		for (size_t i = 0; i < word.size(); i++)
+		for (size_t j = 1; j <= suggestion.size(); ++j)
 		{
-			if (suggestion[i]!=word[i])
+			int left= matrix[i - 1][j];
+			int up= matrix[i][j - 1];
+			int corner=matrix[i - 1][j - 1];
+
+			int min = (left < up ? left : up) > corner ? corner : (left < up ? left : up);
+			
+			if (word.at(i - 1) == suggestion.at(j - 1))
 			{
-				count++;
+			matrix[i][j]= min;
+			}else
+			{
+			matrix[i][j]= min+1;
 			}
+	
 			
 		}
-		
 	}
-		if (word.size()> suggestion.size())
-	{
-		for (size_t i = 0; i < suggestion.size(); i++)
-		{
-			if (suggestion[i]!=word[i])
-			{
-				count++;
-			}
-			
-		}
-		
-	}
-
-	return 0;
+	return matrix[word.size()][suggestion.size()];
 }

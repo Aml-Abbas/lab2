@@ -14,11 +14,11 @@ public:
 private:
 	std::unordered_set<std::string> us;
 	std::vector<Word> words[25];
-	std::vector<string> getTrigrams(const string& word) ;
-	void add_trigram_suggestions( vector<string>& suggestions, const std::string& word) const;
-	void rank_suggestions( vector<string>& suggestions, const std::string& word) const;
-	void trim_suggestions( vector<string>& suggestions) const;
-	int count_dist(string& suggestion, const string& word) const;
+	std::vector<std::string> getTrigrams(const std::string& word)const ;
+	void add_trigram_suggestions( std::vector<std::string>& suggestions, const std::string& word) const;
+	void rank_suggestions( std::vector<std::string>& suggestions, const std::string& word) const;
+	void trim_suggestions( std::vector<std::string>& suggestions) const;
+	int count_dist( const std::string& word,const std::string& suggestion) const;
 };
 
 #endif

@@ -22,11 +22,11 @@ unsigned int Word::get_matches(const vector<string>& t) const
 	{
 		for (const string& e : t)
 		{
-			if (element.substr(0, 1) < e.substr(0, 1))
+			/* if (element.substr(0, 1) < e.substr(0, 1))
 			{
 				break;
 			} 
-			else
+			else */
 			{
 				if (element == e)
 				{

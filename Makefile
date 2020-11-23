@@ -21,14 +21,13 @@ LDFLAGS =   -g
 #LDFLAGS +=  -stdlib=libc++
 
 # Targets
-PROGS =  spell testD
+PROGS =  spell
 
 all: $(PROGS)
 
 
 # Targets rely on implicit rules for compiling and linking
 spell: dictionary.o spell.o  word.o 
-testD: testD.o dictionary.o
 
 # Phony targets
 .PHONY: all test clean distclean
